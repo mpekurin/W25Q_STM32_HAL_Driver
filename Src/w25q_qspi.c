@@ -182,11 +182,11 @@ HAL_StatusTypeDef W25Q_ReadData_DMA(xSPI_HandleTypeDef *hxspi, uint32_t Address,
   QSPI_CommandTypeDef cmd;
   HAL_StatusTypeDef status;
 
-  cmd.Instruction = W25Q_READ_DATA;
+  cmd.Instruction = W25Q_CMD_READ_DATA;
   cmd.InstructionMode = QSPI_INSTRUCTION_1_LINE;
   cmd.Address = Address;
   cmd.AddressMode = QSPI_ADDRESS_1_LINE;
-  cmd.AddressSize = QSPI_ADDRESS_24_BITS;
+  cmd.AddressSize = W25Q_ADDRESS_BITS;
   cmd.AlternateBytes = 0;
   cmd.AlternateByteMode = QSPI_ALTERNATE_BYTES_NONE;
   cmd.AlternateBytesSize = QSPI_ALTERNATE_BYTES_8_BITS;
@@ -212,11 +212,11 @@ HAL_StatusTypeDef W25Q_FastRead_DMA(xSPI_HandleTypeDef *hxspi, uint32_t Address,
   QSPI_CommandTypeDef cmd;
   HAL_StatusTypeDef status;
 
-  cmd.Instruction = W25Q_FAST_READ;
+  cmd.Instruction = W25Q_CMD_FAST_READ;
   cmd.InstructionMode = QSPI_INSTRUCTION_1_LINE;
   cmd.Address = Address;
   cmd.AddressMode = QSPI_ADDRESS_1_LINE;
-  cmd.AddressSize = QSPI_ADDRESS_24_BITS;
+  cmd.AddressSize = W25Q_ADDRESS_BITS;
   cmd.AlternateBytes = 0;
   cmd.AlternateByteMode = QSPI_ALTERNATE_BYTES_NONE;
   cmd.AlternateBytesSize = QSPI_ALTERNATE_BYTES_8_BITS;
@@ -242,11 +242,11 @@ HAL_StatusTypeDef W25Q_FastReadDualOutput_DMA(xSPI_HandleTypeDef *hxspi, uint32_
   QSPI_CommandTypeDef cmd;
   HAL_StatusTypeDef status;
 
-  cmd.Instruction = W25Q_FAST_READ_DUAL_OUTPUT;
+  cmd.Instruction = W25Q_CMD_FAST_READ_DUAL_OUT;
   cmd.InstructionMode = QSPI_INSTRUCTION_1_LINE;
   cmd.Address = Address;
   cmd.AddressMode = QSPI_ADDRESS_1_LINE;
-  cmd.AddressSize = QSPI_ADDRESS_24_BITS;
+  cmd.AddressSize = W25Q_ADDRESS_BITS;
   cmd.AlternateBytes = 0;
   cmd.AlternateByteMode = QSPI_ALTERNATE_BYTES_NONE;
   cmd.AlternateBytesSize = QSPI_ALTERNATE_BYTES_8_BITS;
@@ -272,11 +272,11 @@ HAL_StatusTypeDef W25Q_FastReadQuadOutput_DMA(xSPI_HandleTypeDef *hxspi, uint32_
   QSPI_CommandTypeDef cmd;
   HAL_StatusTypeDef status;
 
-  cmd.Instruction = W25Q_FAST_READ_QUAD_OUTPUT;
+  cmd.Instruction = W25Q_CMD_FAST_READ_QUAD_OUT;
   cmd.InstructionMode = QSPI_INSTRUCTION_1_LINE;
   cmd.Address = Address;
   cmd.AddressMode = QSPI_ADDRESS_1_LINE;
-  cmd.AddressSize = QSPI_ADDRESS_24_BITS;
+  cmd.AddressSize = W25Q_ADDRESS_BITS;
   cmd.AlternateBytes = 0;
   cmd.AlternateByteMode = QSPI_ALTERNATE_BYTES_NONE;
   cmd.AlternateBytesSize = QSPI_ALTERNATE_BYTES_8_BITS;
@@ -302,11 +302,11 @@ HAL_StatusTypeDef W25Q_FastReadDualIo_DMA(xSPI_HandleTypeDef *hxspi, uint32_t Ad
   QSPI_CommandTypeDef cmd;
   HAL_StatusTypeDef status;
 
-  cmd.Instruction = W25Q_FAST_READ_DUAL_IO;
+  cmd.Instruction = W25Q_CMD_FAST_READ_DUAL_IO;
   cmd.InstructionMode = QSPI_INSTRUCTION_1_LINE;
   cmd.Address = Address;
   cmd.AddressMode = QSPI_ADDRESS_2_LINES;
-  cmd.AddressSize = QSPI_ADDRESS_24_BITS;
+  cmd.AddressSize = W25Q_ADDRESS_BITS;
   cmd.AlternateBytes = W25Q_CONTINUOUS_READ_MODE;
   cmd.AlternateByteMode = QSPI_ALTERNATE_BYTES_2_LINES;
   cmd.AlternateBytesSize = QSPI_ALTERNATE_BYTES_8_BITS;
@@ -332,11 +332,11 @@ HAL_StatusTypeDef W25Q_FastReadQuadIo_DMA(xSPI_HandleTypeDef *hxspi, uint32_t Ad
   QSPI_CommandTypeDef cmd;
   HAL_StatusTypeDef status;
 
-  cmd.Instruction = W25Q_FAST_READ_QUAD_IO;
+  cmd.Instruction = W25Q_CMD_FAST_READ_QUAD_IO;
   cmd.InstructionMode = QSPI_INSTRUCTION_1_LINE;
   cmd.Address = Address;
   cmd.AddressMode = QSPI_ADDRESS_4_LINES;
-  cmd.AddressSize = QSPI_ADDRESS_24_BITS;
+  cmd.AddressSize = W25Q_ADDRESS_BITS;
   cmd.AlternateBytes = W25Q_CONTINUOUS_READ_MODE;
   cmd.AlternateByteMode = QSPI_ALTERNATE_BYTES_4_LINES;
   cmd.AlternateBytesSize = QSPI_ALTERNATE_BYTES_8_BITS;
@@ -364,12 +364,22 @@ HAL_StatusTypeDef W25Q_SetBurstWithWrap(xSPI_HandleTypeDef *hxspi, W25Q_WrapMode
 
   cmd.Instruction = W25Q_SET_BURST_WITH_WRAP;
   cmd.InstructionMode = QSPI_INSTRUCTION_1_LINE;
+#ifdef W25Q_32BIT_MODE
+  // 4 dummy bytes (sent as a null address) followed by W7-W0
+  cmd.Address = 0;
+  cmd.AddressMode = QSPI_ADDRESS_4_LINES;
+  cmd.AddressSize = QSPI_ADDRESS_32_BITS;
+  cmd.AlternateBytes = WrapMode;
+  cmd.AlternateByteMode = QSPI_ALTERNATE_BYTES_4_LINES;
+  cmd.AlternateBytesSize = QSPI_ALTERNATE_BYTES_8_BITS;
+#else
   cmd.Address = 0;
   cmd.AddressMode = QSPI_ADDRESS_NONE;
   cmd.AddressSize = QSPI_ADDRESS_8_BITS;
   cmd.AlternateBytes = WrapMode;
   cmd.AlternateByteMode = QSPI_ALTERNATE_BYTES_4_LINES;
   cmd.AlternateBytesSize = QSPI_ALTERNATE_BYTES_32_BITS;
+#endif
   cmd.DummyCycles = 0;
   cmd.NbData = 0;
   cmd.DataMode = QSPI_DATA_NONE;
@@ -387,11 +397,11 @@ HAL_StatusTypeDef W25Q_PageProgram_DMA(xSPI_HandleTypeDef *hxspi, uint32_t Addre
   QSPI_CommandTypeDef cmd;
   HAL_StatusTypeDef status;
 
-  cmd.Instruction = W25Q_PAGE_PROGRAM;
+  cmd.Instruction = W25Q_CMD_PAGE_PROGRAM;
   cmd.InstructionMode = QSPI_INSTRUCTION_1_LINE;
   cmd.Address = Address;
   cmd.AddressMode = QSPI_ADDRESS_1_LINE;
-  cmd.AddressSize = QSPI_ADDRESS_24_BITS;
+  cmd.AddressSize = W25Q_ADDRESS_BITS;
   cmd.AlternateBytes = 0;
   cmd.AlternateByteMode = QSPI_ALTERNATE_BYTES_NONE;
   cmd.AlternateBytesSize = QSPI_ALTERNATE_BYTES_8_BITS;
@@ -417,11 +427,11 @@ HAL_StatusTypeDef W25Q_PageProgramQuadInput_DMA(xSPI_HandleTypeDef *hxspi, uint3
   QSPI_CommandTypeDef cmd;
   HAL_StatusTypeDef status;
 
-  cmd.Instruction = W25Q_PAGE_PROGRAM_QUAD_INPUT;
+  cmd.Instruction = W25Q_CMD_PAGE_PROGRAM_QUAD;
   cmd.InstructionMode = QSPI_INSTRUCTION_1_LINE;
   cmd.Address = Address;
   cmd.AddressMode = QSPI_ADDRESS_1_LINE;
-  cmd.AddressSize = QSPI_ADDRESS_24_BITS;
+  cmd.AddressSize = W25Q_ADDRESS_BITS;
   cmd.AlternateBytes = 0;
   cmd.AlternateByteMode = QSPI_ALTERNATE_BYTES_NONE;
   cmd.AlternateBytesSize = QSPI_ALTERNATE_BYTES_8_BITS;
@@ -447,11 +457,11 @@ HAL_StatusTypeDef W25Q_Erase4KB(xSPI_HandleTypeDef *hxspi, uint32_t Address)
   QSPI_CommandTypeDef cmd;
   HAL_StatusTypeDef status;
 
-  cmd.Instruction = W25Q_SECTOR_ERASE_4KB;
+  cmd.Instruction = W25Q_CMD_SECTOR_ERASE_4KB;
   cmd.InstructionMode = QSPI_INSTRUCTION_1_LINE;
   cmd.Address = Address;
   cmd.AddressMode = QSPI_ADDRESS_1_LINE;
-  cmd.AddressSize = QSPI_ADDRESS_24_BITS;
+  cmd.AddressSize = W25Q_ADDRESS_BITS;
   cmd.AlternateBytes = 0;
   cmd.AlternateByteMode = QSPI_ALTERNATE_BYTES_NONE;
   cmd.AlternateBytesSize = QSPI_ALTERNATE_BYTES_8_BITS;
@@ -476,7 +486,7 @@ HAL_StatusTypeDef W25Q_Erase32KB(xSPI_HandleTypeDef *hxspi, uint32_t Address)
   cmd.InstructionMode = QSPI_INSTRUCTION_1_LINE;
   cmd.Address = Address;
   cmd.AddressMode = QSPI_ADDRESS_1_LINE;
-  cmd.AddressSize = QSPI_ADDRESS_24_BITS;
+  cmd.AddressSize = W25Q_ADDRESS_BITS;
   cmd.AlternateBytes = 0;
   cmd.AlternateByteMode = QSPI_ALTERNATE_BYTES_NONE;
   cmd.AlternateBytesSize = QSPI_ALTERNATE_BYTES_8_BITS;
@@ -497,11 +507,11 @@ HAL_StatusTypeDef W25Q_Erase64KB(xSPI_HandleTypeDef *hxspi, uint32_t Address)
   QSPI_CommandTypeDef cmd;
   HAL_StatusTypeDef status;
 
-  cmd.Instruction = W25Q_BLOCK_ERASE_64KB;
+  cmd.Instruction = W25Q_CMD_BLOCK_ERASE_64KB;
   cmd.InstructionMode = QSPI_INSTRUCTION_1_LINE;
   cmd.Address = Address;
   cmd.AddressMode = QSPI_ADDRESS_1_LINE;
-  cmd.AddressSize = QSPI_ADDRESS_24_BITS;
+  cmd.AddressSize = W25Q_ADDRESS_BITS;
   cmd.AlternateBytes = 0;
   cmd.AlternateByteMode = QSPI_ALTERNATE_BYTES_NONE;
   cmd.AlternateBytesSize = QSPI_ALTERNATE_BYTES_8_BITS;
@@ -652,7 +662,7 @@ HAL_StatusTypeDef W25Q_ReadDeviceId(xSPI_HandleTypeDef *hxspi, uint8_t *pDeviceI
   cmd.InstructionMode = QSPI_INSTRUCTION_1_LINE;
   cmd.Address = 0;
   cmd.AddressMode = QSPI_ADDRESS_1_LINE;
-  cmd.AddressSize = QSPI_ADDRESS_24_BITS;
+  cmd.AddressSize = QSPI_ADDRESS_24_BITS; // 3 bytes even in 4-byte address mode
   cmd.AlternateBytes = 0;
   cmd.AlternateByteMode = QSPI_ALTERNATE_BYTES_NONE;
   cmd.AlternateBytesSize = QSPI_ALTERNATE_BYTES_8_BITS;
@@ -687,7 +697,7 @@ HAL_StatusTypeDef W25Q_ReadDeviceIdDualIo(xSPI_HandleTypeDef *hxspi, uint8_t *pD
   cmd.InstructionMode = QSPI_INSTRUCTION_1_LINE;
   cmd.Address = 0;
   cmd.AddressMode = QSPI_ADDRESS_2_LINES;
-  cmd.AddressSize = QSPI_ADDRESS_24_BITS;
+  cmd.AddressSize = W25Q_ADDRESS_BITS;
   cmd.AlternateBytes = W25Q_CONTINUOUS_READ_MODE;
   cmd.AlternateByteMode = QSPI_ALTERNATE_BYTES_2_LINES;
   cmd.AlternateBytesSize = QSPI_ALTERNATE_BYTES_8_BITS;
@@ -722,7 +732,7 @@ HAL_StatusTypeDef W25Q_ReadDeviceIdQuadIo(xSPI_HandleTypeDef *hxspi, uint8_t *pD
   cmd.InstructionMode = QSPI_INSTRUCTION_1_LINE;
   cmd.Address = 0;
   cmd.AddressMode = QSPI_ADDRESS_4_LINES;
-  cmd.AddressSize = QSPI_ADDRESS_24_BITS;
+  cmd.AddressSize = W25Q_ADDRESS_BITS;
   cmd.AlternateBytes = W25Q_CONTINUOUS_READ_MODE;
   cmd.AlternateByteMode = QSPI_ALTERNATE_BYTES_4_LINES;
   cmd.AlternateBytesSize = QSPI_ALTERNATE_BYTES_8_BITS;
@@ -823,7 +833,7 @@ HAL_StatusTypeDef W25Q_EraseSecurityRegister(xSPI_HandleTypeDef *hxspi, uint8_t 
   cmd.InstructionMode = QSPI_INSTRUCTION_1_LINE;
   cmd.Address = (uint32_t)RegIndex << 12;
   cmd.AddressMode = QSPI_ADDRESS_1_LINE;
-  cmd.AddressSize = QSPI_ADDRESS_24_BITS;
+  cmd.AddressSize = W25Q_ADDRESS_BITS;
   cmd.AlternateBytes = 0;
   cmd.AlternateByteMode = QSPI_ALTERNATE_BYTES_NONE;
   cmd.AlternateBytesSize = QSPI_ALTERNATE_BYTES_8_BITS;
@@ -848,7 +858,7 @@ HAL_StatusTypeDef W25Q_ProgramSecurityRegister_DMA(xSPI_HandleTypeDef *hxspi, ui
   cmd.InstructionMode = QSPI_INSTRUCTION_1_LINE;
   cmd.Address = ((uint32_t)RegIndex << 12) + Address;
   cmd.AddressMode = QSPI_ADDRESS_1_LINE;
-  cmd.AddressSize = QSPI_ADDRESS_24_BITS;
+  cmd.AddressSize = W25Q_ADDRESS_BITS;
   cmd.AlternateBytes = 0;
   cmd.AlternateByteMode = QSPI_ALTERNATE_BYTES_NONE;
   cmd.AlternateBytesSize = QSPI_ALTERNATE_BYTES_8_BITS;
@@ -878,7 +888,7 @@ HAL_StatusTypeDef W25Q_ReadSecurityRegister_DMA(xSPI_HandleTypeDef *hxspi, uint8
   cmd.InstructionMode = QSPI_INSTRUCTION_1_LINE;
   cmd.Address = ((uint32_t)RegIndex << 12) + Address;
   cmd.AddressMode = QSPI_ADDRESS_1_LINE;
-  cmd.AddressSize = QSPI_ADDRESS_24_BITS;
+  cmd.AddressSize = W25Q_ADDRESS_BITS;
   cmd.AlternateBytes = 0;
   cmd.AlternateByteMode = QSPI_ALTERNATE_BYTES_NONE;
   cmd.AlternateBytesSize = QSPI_ALTERNATE_BYTES_8_BITS;
@@ -908,7 +918,7 @@ HAL_StatusTypeDef W25Q_IndividualLock(xSPI_HandleTypeDef *hxspi, uint32_t Addres
   cmd.InstructionMode = QSPI_INSTRUCTION_1_LINE;
   cmd.Address = Address;
   cmd.AddressMode = QSPI_ADDRESS_1_LINE;
-  cmd.AddressSize = QSPI_ADDRESS_24_BITS;
+  cmd.AddressSize = W25Q_ADDRESS_BITS;
   cmd.AlternateBytes = 0;
   cmd.AlternateByteMode = QSPI_ALTERNATE_BYTES_NONE;
   cmd.AlternateBytesSize = QSPI_ALTERNATE_BYTES_8_BITS;
@@ -933,7 +943,7 @@ HAL_StatusTypeDef W25Q_IndividualUnlock(xSPI_HandleTypeDef *hxspi, uint32_t Addr
   cmd.InstructionMode = QSPI_INSTRUCTION_1_LINE;
   cmd.Address = Address;
   cmd.AddressMode = QSPI_ADDRESS_1_LINE;
-  cmd.AddressSize = QSPI_ADDRESS_24_BITS;
+  cmd.AddressSize = W25Q_ADDRESS_BITS;
   cmd.AlternateBytes = 0;
   cmd.AlternateByteMode = QSPI_ALTERNATE_BYTES_NONE;
   cmd.AlternateBytesSize = QSPI_ALTERNATE_BYTES_8_BITS;
@@ -958,7 +968,7 @@ HAL_StatusTypeDef W25Q_ReadLockState(xSPI_HandleTypeDef *hxspi, uint32_t Address
   cmd.InstructionMode = QSPI_INSTRUCTION_1_LINE;
   cmd.Address = Address;
   cmd.AddressMode = QSPI_ADDRESS_1_LINE;
-  cmd.AddressSize = QSPI_ADDRESS_24_BITS;
+  cmd.AddressSize = W25Q_ADDRESS_BITS;
   cmd.AlternateBytes = 0;
   cmd.AlternateByteMode = QSPI_ALTERNATE_BYTES_NONE;
   cmd.AlternateBytesSize = QSPI_ALTERNATE_BYTES_8_BITS;
@@ -1060,6 +1070,56 @@ HAL_StatusTypeDef W25Q_ResetDevice(xSPI_HandleTypeDef *hxspi)
   HAL_StatusTypeDef status;
 
   cmd.Instruction = W25Q_RESET_DEVICE;
+  cmd.InstructionMode = QSPI_INSTRUCTION_1_LINE;
+  cmd.Address = 0;
+  cmd.AddressMode = QSPI_ADDRESS_NONE;
+  cmd.AddressSize = QSPI_ADDRESS_8_BITS;
+  cmd.AlternateBytes = 0;
+  cmd.AlternateByteMode = QSPI_ALTERNATE_BYTES_NONE;
+  cmd.AlternateBytesSize = QSPI_ALTERNATE_BYTES_8_BITS;
+  cmd.DummyCycles = 0;
+  cmd.NbData = 0;
+  cmd.DataMode = QSPI_DATA_NONE;
+  cmd.DdrMode = QSPI_DDR_MODE_DISABLE;
+  cmd.DdrHoldHalfCycle = QSPI_DDR_HHC_ANALOG_DELAY;
+  cmd.SIOOMode = QSPI_SIOO_INST_EVERY_CMD;
+
+  status = HAL_QSPI_Command(hxspi, &cmd, W25Q_TIMEOUT_VALUE);
+
+  return status;
+}
+
+HAL_StatusTypeDef W25Q_Enter4BytesMode(xSPI_HandleTypeDef *hxspi)
+{
+  QSPI_CommandTypeDef cmd;
+  HAL_StatusTypeDef status;
+
+  cmd.Instruction = W25Q_ENTER_4B_ADDRESS_MODE;
+  cmd.InstructionMode = QSPI_INSTRUCTION_1_LINE;
+  cmd.Address = 0;
+  cmd.AddressMode = QSPI_ADDRESS_NONE;
+  cmd.AddressSize = QSPI_ADDRESS_8_BITS;
+  cmd.AlternateBytes = 0;
+  cmd.AlternateByteMode = QSPI_ALTERNATE_BYTES_NONE;
+  cmd.AlternateBytesSize = QSPI_ALTERNATE_BYTES_8_BITS;
+  cmd.DummyCycles = 0;
+  cmd.NbData = 0;
+  cmd.DataMode = QSPI_DATA_NONE;
+  cmd.DdrMode = QSPI_DDR_MODE_DISABLE;
+  cmd.DdrHoldHalfCycle = QSPI_DDR_HHC_ANALOG_DELAY;
+  cmd.SIOOMode = QSPI_SIOO_INST_EVERY_CMD;
+
+  status = HAL_QSPI_Command(hxspi, &cmd, W25Q_TIMEOUT_VALUE);
+
+  return status;
+}
+
+HAL_StatusTypeDef W25Q_Exit4BytesMode(xSPI_HandleTypeDef *hxspi)
+{
+  QSPI_CommandTypeDef cmd;
+  HAL_StatusTypeDef status;
+
+  cmd.Instruction = W25Q_EXIT_4B_ADDRESS_MODE;
   cmd.InstructionMode = QSPI_INSTRUCTION_1_LINE;
   cmd.Address = 0;
   cmd.AddressMode = QSPI_ADDRESS_NONE;

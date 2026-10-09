@@ -11,9 +11,9 @@ A universal, hardware-abstracted driver for Winbond W25Q SPI Flash memories. Des
 
 **Limitations:**
 
-*   **Addressing Mode:** Currently supports **24-bit addressing** only.
+*   **Addressing Mode:** **24-bit addressing** by default.
     *   Compatible with Flash sizes up to **128 Mbit (16 MB)**.
-    *   Memories larger than 16 MB (256 Mbit, 512 Mbit) are not yet fully supported (requires 32-bit addressing/4-byte mode).
+    *   Memories larger than 16 MB (256 Mbit, 512 Mbit): define `W25Q_32BIT_MODE` and call `W25Q_Enter4BytesMode()` after each reset (QSPI only; the OSPI implementation is 24-bit only).
 *   **Operating Mode:** Works in **Indirect Mode** (Command/Response). Memory-Mapped Mode (XIP) is not implemented.
 
 ## Requirements

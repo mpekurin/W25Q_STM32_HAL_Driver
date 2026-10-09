@@ -25,6 +25,14 @@ extern "C" {
   #define W25Q_OSPI_FLASH_ID HAL_OSPI_FLASH_ID_1
 #endif
 
+// Addressing mode: 24-bit by default, which reaches the first 16MB only.
+// Define W25Q_32BIT_MODE (in main.h or preprocessor) for 32-bit addressing, needed to reach memory above 16MB
+// (256Mb chips and larger, e.g. W25Q512JV). The chip must then be put in 4-byte address mode with
+// W25Q_Enter4BytesMode after each reset.
+#if defined(W25Q_24BIT_MODE) && defined(W25Q_32BIT_MODE)
+  #error "W25Q_24BIT_MODE and W25Q_32BIT_MODE are exclusive"
+#endif
+
 /* --- Flash Geometry --- */
 
 #define W25Q_FLASH_BASE           0x00000000U
@@ -171,6 +179,8 @@ HAL_StatusTypeDef W25Q_GlobalLock(xSPI_HandleTypeDef *hxspi);
 HAL_StatusTypeDef W25Q_GlobalUnlock(xSPI_HandleTypeDef *hxspi);
 HAL_StatusTypeDef W25Q_EnableReset(xSPI_HandleTypeDef *hxspi);
 HAL_StatusTypeDef W25Q_ResetDevice(xSPI_HandleTypeDef *hxspi);
+HAL_StatusTypeDef W25Q_Enter4BytesMode(xSPI_HandleTypeDef *hxspi);
+HAL_StatusTypeDef W25Q_Exit4BytesMode(xSPI_HandleTypeDef *hxspi);
 
 HAL_StatusTypeDef W25Q_BusyFlagPolling_IT(xSPI_HandleTypeDef *hxspi);
 
